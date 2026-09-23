@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: redbeanz-backend
+  config:
+    import: "optional:file:./.env[.properties]"
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
