@@ -20,6 +20,12 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs",
+                    "/v3/api-docs/**"
+                ).permitAll()
                 .requestMatchers("/security-test/public").permitAll()
                 .requestMatchers("/security-test/admin").hasRole("ADMIN")
                 .requestMatchers("/security-test/user").authenticated()
