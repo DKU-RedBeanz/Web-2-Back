@@ -33,7 +33,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 }
 
@@ -47,4 +46,18 @@ tasks.withType(Test).configureEach {
 
 tasks.named('bootRun') {
     workingDir = rootProject.projectDir
+}
+
+// Run after the reviewed DDL has been applied to your personal MySQL.
+tasks.named('test') {
+    useJUnitPlatform { excludeTags 'signup-mysql' }
+}
+
+tasks.register('signupMySqlTest', Test) {
+    description = 'Verifies signup against the personal MySQL configured in .env.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'signup-mysql' }
+    shouldRunAfter tasks.named('test')
 }
