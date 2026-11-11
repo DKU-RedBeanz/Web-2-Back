@@ -1,6 +1,8 @@
 package com.redbeanz.backend.user;
 
 import com.redbeanz.backend.user.dto.SignupRequest;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Tag;
@@ -8,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -19,6 +23,7 @@ import tools.jackson.databind.ObjectMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false, print = org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint.NONE)
 @Transactional
+@TestPropertySource("/jwt-test.properties")
 class SignupMySqlTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
@@ -57,6 +63,33 @@ class SignupMySqlTest {
         assertThat(saved.getRole()).isEqualTo(UserRole.USER);
         assertThat(saved.getPasswordHash()).isNotEqualTo(request.password());
         assertThat(encoder.matches(request.password(), saved.getPasswordHash())).isTrue();
+    }
+
+    @Test
+    void signupCredentialsCanLoginAndFetchTheStoredProfile() throws Exception {
+        var request = request();
+        var signupResult = signup(request).andExpect(status().isCreated()).andReturn();
+        long id = mapper.readTree(signupResult.getResponse().getContentAsString()).path("id").asLong();
+        entityManager.clear();
+
+        var login = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(Map.of(
+                    "loginId", request.loginId().toUpperCase(Locale.ROOT), "password", request.password()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tokenType").value("Bearer"))
+            .andExpect(jsonPath("$.expiresIn").value(3600))
+            .andReturn();
+        String token = mapper.readTree(login.getResponse().getContentAsString()).path("accessToken").asText();
+        entityManager.clear();
+
+        mvc.perform(get("/api/users/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.loginId").value(request.loginId()))
+            .andExpect(jsonPath("$.email").value(request.email()))
+            .andExpect(jsonPath("$.nickname").value(request.nickname()))
+            .andExpect(jsonPath("$.role").value("USER"))
+            .andExpect(jsonPath("$.passwordHash").doesNotExist());
     }
 
     @Test

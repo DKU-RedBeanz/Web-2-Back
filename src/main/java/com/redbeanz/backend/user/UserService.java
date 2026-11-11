@@ -2,7 +2,9 @@ package com.redbeanz.backend.user;
 
 import com.redbeanz.backend.user.dto.SignupRequest;
 import com.redbeanz.backend.user.dto.SignupResponse;
+import com.redbeanz.backend.user.dto.UserProfileResponse;
 import java.util.Locale;
+import java.util.Optional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +39,11 @@ public class UserService {
             }
             throw exception;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserProfileResponse> findProfile(long id) {
+        return userRepository.findById(id).map(UserProfileResponse::from);
     }
 
     private boolean isSignupUniqueViolation(Throwable exception) {

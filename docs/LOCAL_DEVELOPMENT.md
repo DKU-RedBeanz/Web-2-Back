@@ -72,13 +72,28 @@ SELECT VERSION();
 Copy-Item .env.example .env
 ```
 
-`.env`를 편집기로 열어 세 값을 자신의 값으로 바꿉니다. 아래 계정·비밀번호는 실제 값이 아닌 자리표시자입니다.
+`.env`를 편집기로 열어 DB 값과 JWT 서명 키를 설정합니다. 아래 값은 입력 형식의 예시입니다.
 
 ```properties
 DB_URL=jdbc:mysql://localhost:3306/redbeanz
 DB_USERNAME=your_local_username
 DB_PASSWORD=your_local_password
+JWT_SECRET_BASE64=
+CORS_ALLOWED_ORIGINS=
 ```
+
+`bootRun`과 웹 서버 실행에는 `JWT_SECRET_BASE64`가 필요합니다. 32바이트 이상의 무작위 키를 Base64로 생성해 `.env`에 넣으세요.
+
+```powershell
+$jwtBytes = New-Object byte[] 32
+$jwtRng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+try { $jwtRng.GetBytes($jwtBytes) } finally { $jwtRng.Dispose() }
+[Convert]::ToBase64String($jwtBytes)
+```
+
+macOS와 Linux에서는 `openssl rand -base64 32`를 사용합니다.
+
+프런트엔드가 다른 출처에서 실행된다면 `CORS_ALLOWED_ORIGINS=http://localhost:5173`처럼 출처를 쉼표로 나열합니다. 가입용 CSRF 조회와 가입 요청은 같은 세션 쿠키를 써야 하므로, 로컬에서는 양쪽 호스트를 `localhost`로 맞추고 교차 출처 요청에 `credentials: "include"`를 사용합니다.
 
 - `.env.txt`가 아니라 정확히 `.env`여야 합니다. Windows 탐색기의 파일 확장명 표시를 켜면 확인하기 쉽습니다.
 - 포트가 3306이 아니면 URL의 포트도 수정합니다.
@@ -144,9 +159,11 @@ macOS / Linux에서는 `.\gradlew.bat` 대신 `./gradlew`를 사용합니다. �
 
 `Started RedbeanzBackendApplication`이 보이고 프로세스가 계속 실행 중이면 기동된 것입니다. 기본 포트는 8080입니다. 종료할 때는 해당 터미널에서 Ctrl+C를 누릅니다.
 
-Spring Security 기본 설정으로 로그인 화면 또는 401 응답이 나올 수 있습니다. 기본 사용자 암호가 실행 로그에 생성될 수 있으므로 로그 전체를 공유하지 않습니다. 기본 보안을 끄거나 모든 요청을 허용하는 설정을 임의로 추가하지 않았습니다. 로그인 기능 구현은 이번 작업 범위 밖입니다.
+회원가입·로그인·본인 조회를 확인하려면 [회원가입 SQL 안내](SIGNUP.md#4-멘토-확인-후-개인-mysql에-테이블-만들기)에 따라 `users` 테이블을 준비합니다. 로그인 성공 응답의 `accessToken`을 본인 정보 조회의 `Authorization: Bearer <accessToken>` 헤더에 사용합니다.
 
-SpringDoc 기본 경로는 `/swagger-ui.html`, `/v3/api-docs`이며 현재는 기본 보안 적용 대상입니다. 아직 도메인 컨트롤러가 없으므로 문서화할 업무 API도 없습니다.
+로컬 테스트 계정으로 회원 조회 조건을 확인할 수 있습니다. [로그인과 내 정보 조회 SQL](sql/user-login-and-profile.sql)
+
+Swagger UI(`/swagger-ui.html`)와 OpenAPI 명세(`/v3/api-docs`)는 로그인 없이 열 수 있습니다.
 
 Jar 생성은 `./gradlew bootJar`(Windows ` .\gradlew.bat bootJar`)로 합니다. 생성된 Jar를 실행할 때도 프로젝트 루트에서 `java -jar build/libs/redbeanz-backend-0.0.1-SNAPSHOT.jar`를 사용해야 루트 `.env`를 읽습니다.
 
