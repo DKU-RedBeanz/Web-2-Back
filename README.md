@@ -13,7 +13,7 @@
 | 저장소 | [DKU-RedBeanz/Web-2-Back](https://github.com/DKU-RedBeanz/Web-2-Back) |
 | 라이선스 | [MIT](LICENSE) |
 
-공통 Spring 시작 코드와 개인 로컬 MySQL 연결 검증 테스트를 제공합니다. 회원가입 코드를 추가했으며 SQL과 필드 정책은 리뷰 전입니다. 로그인 기능은 아직 구현하지 않았습니다.
+공통 Spring 시작 코드와 개인 로컬 MySQL 연결 검증 테스트를 제공합니다. User API는 회원가입, JWT 로그인, 본인 정보 조회를 지원합니다.
 
 ## 회원가입 작업 — Sprint 2
 
@@ -47,9 +47,7 @@
 - MySQL Driver
 - Spring Boot DevTools
 - SpringDoc OpenAPI
-- Spring Security
-
-의존성 추가와 기능 구현은 구분합니다. 특히 인증·인가 구현은 이번 주 과제에 포함하지 않습니다.
+- Spring Security · OAuth2 Resource Server
 
 ## 실행 방법
 
@@ -58,7 +56,7 @@
 1. JDK 21을 준비하고 IDE의 Project JDK와 Gradle JVM을 모두 21로 선택합니다.
 2. 이 저장소의 루트 폴더(`build.gradle`이 있는 위치)를 IDE에서 엽니다.
 3. 개인 MySQL 서버를 켜고 빈 데이터베이스 `redbeanz`를 만듭니다.
-4. `.env.example`을 `.env`로 복사하고 개인 DB 값을 입력합니다. `.env`는 공유하지 않습니다.
+4. `.env`에 개인 DB 값과 `JWT_SECRET_BASE64`를 설정합니다. 파일이 없다면 `.env.example`을 복사합니다. 키 생성 방법은 [로컬 실행 안내](docs/LOCAL_DEVELOPMENT.md#4-나만의-env-작성)를 참고하세요.
 5. 아래 명령을 프로젝트 루트에서 실행합니다. IDE의 애플리케이션·테스트 작업 디렉터리도 루트로 맞춥니다.
 
 Windows PowerShell:
@@ -86,7 +84,7 @@ cp -n .env.example .env
 
 Spring Boot가 `.env`를 Java properties 형식으로 직접 읽습니다. IDE용 dotenv 플러그인은 필요 없습니다. `export`나 값을 감싸는 따옴표를 쓰지 않고, 역슬래시는 `\\`로 적습니다. 같은 이름의 OS·IDE 환경변수가 있으면 파일보다 우선합니다. `optional:`은 파일 누락만 허용하며 DB 값 자체를 선택 사항으로 만들지 않습니다.
 
-Spring Security의 기본 보안 동작을 유지합니다. 브라우저에서 로그인 화면이나 401 응답이 보일 수 있습니다. 이는 DB 연결 실패를 의미하지 않습니다. 인증·인가 기능이나 DB 확인용 공개 API는 추가하지 않았습니다.
+회원가입·로그인과 Swagger 문서는 공개 경로입니다. 본인 정보 조회에는 `Authorization: Bearer <accessToken>` 헤더를 보냅니다.
 
 ### 파일 구조
 

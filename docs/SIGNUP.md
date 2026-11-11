@@ -27,7 +27,7 @@ Java 길이 검사는 UTF-16 기준입니다. 한글 비밀번호처럼 여러 �
 - HTTP 필터 Bean에만 Servlet 조건을 적용해, HTTP 서버를 띄우지 않는 기존 MySQL 연결 테스트에서도 PasswordEncoder를 사용할 수 있게 했습니다.
 - `POST /api/users`, `GET /api/users/csrf`만 메서드와 경로를 지정해 공개했습니다. 기존 나머지 인가 규칙을 유지합니다.
 - 기존 CSRF 보호를 유지합니다. 회원가입은 로그인은 필요 없지만 CSRF 토큰과 같은 세션의 쿠키는 필요합니다. CSRF 누락·불일치는 Security 필터에서 **403**입니다. 이는 DTO 검증 오류 **400**과 다릅니다.
-- `GET /api/users/csrf`는 Spring Security가 생성한 토큰을 받는 보조 경로입니다. DB 정보를 노출하지 않으며 응답에 `Cache-Control: no-store`를 설정합니다. 이를 로그인 세션 방식의 최종 결정으로 간주하지 않습니다. CORS·JWT·로그인·자동 로그인은 구현하지 않았습니다.
+- `GET /api/users/csrf`는 Spring Security가 생성한 토큰을 받는 보조 경로입니다. DB 정보를 노출하지 않으며 응답에 `Cache-Control: no-store`를 설정합니다. 이를 로그인 세션 방식의 최종 결정으로 간주하지 않습니다.
 
 토큰 경로와 정책은 박승민·멘토의 리뷰 대상입니다. CSRF 공식 문서의 [토큰 제공 방식](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html)을 참고했습니다. Spring Boot 4의 [WebMvcTest](https://docs.spring.io/spring-boot/api/java/org/springframework/boot/webmvc/test/autoconfigure/WebMvcTest.html) 패키지를 사용합니다.
 
@@ -126,6 +126,8 @@ Service 테스트는 저장소 대역을, HTTP 테스트는 Service 대역을 �
 `signupMySqlTest`는 `.env`의 실제 DataSource로 Controller → Service → Repository → MySQL을 거칩니다. DB를 H2로 바꾸지 않습니다. 저장 후 영속성 캐시를 비우고 다시 읽어 BCrypt `matches`를 확인합니다. 테스트 데이터는 임의의 식별자를 사용하고 트랜잭션을 롤백합니다. 자동 증가 번호에 빈 번호가 남을 수 있으나 기존 회원은 삭제하지 않습니다. 이 테스트는 테이블이 준비되지 않은 공통 작업을 방해하지 않도록 일반 `test`와 분리했습니다.
 
 ### 5-3. 서버 켜기
+
+서버를 실행하기 전에 [로컬 실행 안내](LOCAL_DEVELOPMENT.md#4-나만의-env-작성)에 따라 `.env`의 `JWT_SECRET_BASE64`를 설정합니다.
 
 ```powershell
 .\gradlew.bat bootRun

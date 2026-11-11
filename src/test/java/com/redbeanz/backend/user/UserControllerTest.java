@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest({UserController.class, SignupCsrfController.class})
 @Import(SecurityConfig.class)
+@TestPropertySource("/jwt-test.properties")
 class UserControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
