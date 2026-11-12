@@ -3,6 +3,7 @@ package com.redbeanz.backend.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +27,7 @@ public class SecurityConfig {
                     "/v3/api-docs",
                     "/v3/api-docs/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/practice/restaurants/{id}").permitAll()
                 .requestMatchers("/security-test/public").permitAll()
                 .requestMatchers("/security-test/admin").hasRole("ADMIN")
                 .requestMatchers("/security-test/user").authenticated()
