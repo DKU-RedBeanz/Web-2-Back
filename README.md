@@ -13,7 +13,11 @@
 | 저장소 | [DKU-RedBeanz/Web-2-Back](https://github.com/DKU-RedBeanz/Web-2-Back) |
 | 라이선스 | [MIT](LICENSE) |
 
-공통 Spring 시작 코드와 개인 로컬 MySQL 연결 검증 테스트를 제공합니다. 도메인 기능과 로그인 기능은 아직 구현하지 않았습니다.
+공통 Spring 시작 코드와 개인 로컬 MySQL 연결 검증 테스트를 제공합니다. 회원가입 코드를 추가했으며 SQL과 필드 정책은 리뷰 전입니다. 로그인 기능은 아직 구현하지 않았습니다.
+
+## 회원가입 작업 — Sprint 2
+
+김형빈 담당 회원가입 구현은 [설계·API·실행 안내](docs/SIGNUP.md), [코드 설명](docs/SIGNUP_CODE_GUIDE.md), [검증 기록](docs/SIGNUP_VERIFICATION.md)에 정리했습니다. 기존 Week 2 안내는 공통 환경 준비를 위한 기록으로 유지합니다. 회원 테이블은 멘토 확인 후 SQL로 생성하며 `ddl-auto: none`을 유지합니다.
 
 ## 기술 및 프로젝트 설정
 
